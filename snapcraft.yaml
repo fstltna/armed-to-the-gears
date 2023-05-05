@@ -1,0 +1,79 @@
+name:  armed-to-the-gears
+title:  Armed to the Gears
+version: "0.1.0"
+summary:  Armed to the Gears is a 3D/isometric game
+description: |
+  Armed to the Gears is a 3D/isometric game that combines Real-time Strategy, Capture-the-Flag and Tower Defense genres, all into a simple concept. Set in a dystopic, totalitarian future where the government, under the flag of the Ministry, is using robots to enslave the whole population. You are the Rebellion's best engineer, who's able to hack into the Ministry's Infantry Class robots and use their own weapons against them. Your Mission: Capture and maintain every reactor on the map by standing next to them for a few seconds. Captured Reactors will grant Energy points, used to teleport turrets, call air support into the battle field and repair your robot.
+
+grade: stable
+icon: armed-to-the-gears_icon.png
+
+base: core18
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: i386
+
+environment:
+  WINEDLLOVERRIDES: "$WINEDLLOVERRIDES;mscoree,mshtml="    # Prevent pop-ups about Wine Mono and Wine Gecko
+  SOMMELIER_STRICT: "1"                                    # Make Sommelier exit when unset variable is used. (useful to find bugs in sommelier)
+
+apps:
+  armed-to-the-gears:
+    extensions: [ gnome-3-28 ]
+    command: bin/sommelier run-exe
+    environment:
+      RUN_EXE: "C:/Program Files (x86)/Armed to the Gears prototype 1.0/attg-prototype.exe"
+      INSTALL_EXE: "$SNAP/attg10-setup.exe"
+      #INSTALL_FLAGS: "/S"
+    plugs:
+      - home
+      - network
+      - network-bind
+      - removable-media
+      - cups
+  # The wine command can be used to run applications inside the wine
+  # environment that this snap uses.
+  #
+  # For example, users can configure the wine environment of this snap
+  # by running `myapp.wine winecfg`.
+  wine:
+    extensions: [ gnome-3-28 ]
+    command: bin/sommelier
+    plugs:
+      - home
+      - network
+      - network-bind
+      - removable-media
+      - cups
+ # The winetricks command can be used to run winetricks inside the wine
+  # environment that this snap uses.
+  winetricks:
+    extensions: [ gnome-3-28 ]
+    command: bin/sommelier winetricks
+    plugs:
+      - network
+
+parts:
+  installer:
+    plugin: dump
+    source: ./
+
+  # The sommelier script helps you snap Windows applications using Wine. It 
+  # initializes and configures Wine and installs the Windows application.
+  sommelier:
+    plugin: make
+    source: https://github.com/snapcrafters/sommelier-core.git
+
+# These plugs are used to connect the snap to the wine runtime.
+plugs:
+  wine-runtime:
+    interface: content
+    target: $SNAP/wine-runtime
+    default-provider: wine-platform-runtime
+  wine-5-stable:
+    interface: content
+    target: $SNAP/wine-platform
+    default-provider: wine-platform-5-stable
+
